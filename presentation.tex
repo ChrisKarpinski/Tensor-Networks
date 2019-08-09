@@ -1,0 +1,600 @@
+\documentclass[11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usetheme{default}
+\usepackage{graphicx}
+\newcommand{\vs}{\vskip10pt}
+\usepackage{amsmath}% http://ctan.org/pkg/amsmath
+
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{defn}[theorem]{Definition}
+\newtheorem{thm}[theorem]{Theorem}
+\newtheorem{exe}[theorem]{Example}
+\newtheorem{cor}[theorem]{Corollary}
+\newtheorem{conj}[theorem]{Conjecture}
+\newtheorem{rem}[theorem]{Remark}
+\newtheorem{lem}[theorem]{Lemma}
+
+\begin{document}
+	\author{Chris Karpinski}
+	\title{Tensor networks, Geometry and Entanglement}
+	%\subtitle{}
+	%\logo{}
+	%\institute{Carleton University}
+	%\date{August 23, 2019}
+	%\subject{}
+	%\setbeamercovered{transparent}
+	%\setbeamertemplate{navigation symbols}{}
+	\begin{frame}[plain]
+		\maketitle
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Introduction}
+		
+		Overview: 
+		
+
+		\begin{itemize}
+		 
+		\vs 
+		\item Introduction to tensors and tensor networks
+		\vs 
+		\item Examples of tensor networks
+		\vs 
+		\item Application 1: Holography and AdS/CFT
+		\vs 
+		\item Application 2: Spin networks and algebraic entropy
+		\vs
+		 \item Conclusion
+		
+		\end{itemize}
+		
+	\end{frame}
+
+\begin{frame}
+	\frametitle{Tensors}
+	
+		\begin{defn}
+			
+			Let V be a vector space over a field F. A \textbf{rank-k tensor} T on V is a k-linear form on V. That is, $\ T:V^k \rightarrow F $ \fontsize{8}{1} satisfying: $\ T(v_1,...,\alpha v_i + \beta v_i^{'}, v_{i+1},...,v_k) = \alpha T(v_1,...,v_i,...,v_k) + \beta T(v_1,...,v_i^{'},...,v_k) $
+			$\forall \alpha, \beta \in F, \forall v_1,...,v_i,v_i^{'},...,v_k \in V, \forall 1 \leq i \leq k  $ and where $\ V^k = \underbrace {VxVx...xV}_{\text{k}} $.
+			
+		\end{defn}	
+	\vs
+	Examples: 
+	
+	\begin {itemize}
+	\item Scalars (field elements) are rank-0 tensors
+	\item Vectors in V are rank-1 tensors. 
+	\item Matrices are rank-2 tensors. 
+	\item Real inner product is a rank-2 tensor.
+	\item Determinant of an nxn matrix is a rank-n tensor. 
+	
+	\end {itemize}
+	
+\end{frame}
+
+\begin{frame} 
+	
+	\frametitle{Operations on Tensors}
+	
+	Common operations on tensors are the following: 
+	\vs 
+		Let S, T be rank-n and rank-m, respectively, tensors on a d-dimensional vector space V (d < $\infty$).
+		
+	\begin{itemize}
+		
+		\item Tensor Product: Define the tensor product of S and T, denoted by $\ S \otimes T $ , as the rank-(n+m) tensor on V defined by: \fontsize{8}{1}
+		\vs
+		$\ (S \otimes T) (v_1,...,v_n,v_{n+1},...v_{n+m}) = S(v_1,...,v_n)T(v_{n+1},...,v_{n+m}) \forall v_i \in V $
+		\fontsize{12}{1}
+		\vs
+		\item Tensor Contraction: Denote the basis elements of V as 0,1,...,d-1. Define the contraction C of S and T along the (k,l) indices to be the rank-(n+m-2) tensor on V defined by: \fontsize{8}{1}
+		\vs
+		$ C(i_1,...,i_{n+m-2}) = \sum_{j=0}^{d-1} S(i_1,...,i_{k-1},j,i_{k+1},...,i_n)T(i_1,...,i_{l-1},j,i_{l+1},...,i_m) $ where each of the $\ i_1,...,i_{n+m-2} $ are basis vectors of V. 
+		\vs 
+		We will focus mainly on tensor contraction in constructing tensor networks.
+		
+	\end{itemize}
+	
+	\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Interpretation of tensors}
+	
+	There are two equivalent ways in which we will interpret tensors. 
+	
+	From now on we consider our vector space to be a Hilbert space H (i.e, a complex inner product space) of dimension d < $ \infty $ and having orthonormal basis ($ |0 \rangle, |1 \rangle, ..., |d-1 \rangle$). 
+	\vs
+	
+	(1) As vectors: Consider a state $ |\psi \rangle \in H^{\otimes k} := \underbrace {H \otimes H \otimes ... \otimes H}_{\text{k}} $. 
+	
+	\begin{itemize} 
+	
+	\item A basis for $ H^{\otimes k} $ is $ \{|i_1 i_2 ... i_k \rangle $: $i_1,...,i_k \in  \{0,1,...,d-1\}\}$. Expanding $ |\psi \rangle $ in this basis, 
+	\vs
+	$ |\psi \rangle = \sum_{i_1,...,i_k = 0}^{d-1} T_{i_1,...,i_k} |i_1...i_k \rangle $
+	\vs
+	where $T_{i_1,...,i_k}$ stores the coefficient of $ |\psi \rangle $ corresponding to the basis vector $ |i_1...i_k \rangle $. 
+	
+	\item The coefficient tensor T is uniquely determined by $ |\psi \rangle $ (and vice-versa), hence we associate T with the state $ |\psi \rangle $. 
+	
+	
+	%we may store the coefficients of $ |\psi \rangle $ with respect to the basis in a rank-k tensor T giving $ |\psi \rangle = \sum_{i_1,...,i_k = 0}^{d-1} T_{i_1,...,i_k} |i_1...i_k \rangle $ where $T_{i_1,...,i_k}$ is the value of the tensor T at the k-tuple of vectors $ (|i_1 \rangle,...|i_k \rangle) $ and returns the coefficient of $ |\psi \rangle $ corresponding to the basis vector $ |i_1...i_k \rangle $. The tensor T is uniquely determined by $ |\psi \rangle $, hence we associate T with the state $ |\psi \rangle $. 
+	
+	\end{itemize}
+	
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Interpretation of tensors (continued)}
+	
+	We may equivalently interpret tensors in another way: 
+	\vs
+	
+	(2) As linear maps: Consider once again $ |\psi \rangle \in H^{\otimes k} $ with its associated tensor T and partition k into a sum of non-negative integers n,m: n+m = k, so that $ H^{\otimes k} = H^{\otimes n} \otimes H^{\otimes m} $. 
+	
+	\begin{itemize}
+		
+		\item We define a linear map $ T: H^{\otimes n} \rightarrow H^{\otimes m} $ by:
+		
+		\vs
+		$ T(|i_1...i_n \rangle) = \sum_{j_1,...,j_m = 0}^{d-1} T_{j_1...j_mi_1...i_n} |j_1...j_m \rangle $.
+		\vs
+		\item More concisely, we may write: $T: |a\rangle \mapsto \sum_{b} T_{ba} |b\rangle $ where $ |a \rangle $ is an orthonormal basis for $H^{\otimes n}$ and $ |b \rangle $ is one for $H^{\otimes m}$. 
+		\vs
+		\item Note that we recover the vector/state interpretation if we take the paritition k = k+0. 
+		
+	\end{itemize}
+	
+	
+\end{frame}
+
+
+\begin{frame}
+	
+	\frametitle{Geometric representation of tensors}
+
+	We view a tensor geometrically as a node with several legs coming out of it, with the number of legs being the rank of the tensor, as depicted below. 
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.2\linewidth]{tensors}
+		\caption{A 6 legged (rank-6) tensor}
+		\label{Figure 1: A 6 legged tensor.}
+	\end{figure}
+
+	We feed basis vectors $ i_1,...,i_6  \in \{0,1,...,d-1\}$ into the legs and get out a scalar (complex number). Hence such a tensor T represents a state $ |\psi \rangle = \sum_{i_1,...,i_6 = 0}^{d-1} T_{i_1,...,i_6} |i_1...i_6 \rangle $in $ H^{\otimes 6} $.
+
+	%The legs 1,...,6 correspond to basis vectors $ i_1,...,i_6 $ = 0,1,...,d-1 (where d is referred to as the \textbf{bond dimension})) that we feed the tensor. The tensor then outputs a complex number for each arrangement of these vectors. Hence such a tensor encodes all of the information of a state in $ (\mathbb{C}^d)^{\otimes 6} $. Equivalently, the tensor corresponds to a linear map from the Hilbert space of any one portion of the legs to the complementary portion. 
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Geometric representation of tensors (continued)}
+	
+	We may also represent the linear map interpretation of a tensor geometrically, as a linear map from the Hilbert space corresponding to a portion of its legs to the Hilbert space of the complementary portion, as shown below. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{"Tensor map"}
+	\caption{A rank-5 tensor as a linear map from the Hilbert space on legs 1,2 to the Hilbert space of the complementary legs 3,4,5}
+	\label{fig:tensor-map}
+\end{figure}
+	
+	
+	
+\end{frame}
+
+
+\begin{frame}
+	
+	\frametitle{Operations on tensors geometrically}
+
+	We can now visualize the tensor operations we defined earlier, as demonstrated below.
+	
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\linewidth]{"tensor product"}
+	\caption{Tensor product of a 4-legged and 3-legged tensor resulting in a 7-legged tensor.}
+	\label{fig:tensor-product}
+\end{figure}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\linewidth]{"tensor contraction"}
+		\caption{Contraction of two four-legged tensors along the indices (4,1). This results in a tensor with 6 free legs (therefore a state in $ H^{\otimes 6} $) and a contracted leg denoted by k which runs through 0,...,d-1}
+		\label{fig:tensor-contraction}
+	\end{figure}
+	
+	
+
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Tensor networks}
+	
+		\begin{defn}
+		
+		A \textbf{tensor network} is a contraction and product of tensors. 
+	\end{defn}	
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\linewidth]{"Open and closed networks"}
+	\caption{Examples of tensor networks constructed from the contraction of 3-legged tensors. Network (a) is an open tensor network hence representing a non-zero rank tensor while network (b) is a closed tensor network representing a scalar (rank-0 tensor).}
+	\label{fig:open-and-closed-networks}
+\end{figure}
+	
+	Tensor networks may be either closed(evaluated) or open(non-evaluated). Closed networks have no free legs and represent a scalar while open networks contain free legs and hence represent tensors of non-zero rank. 
+	
+\end{frame}
+
+\begin{frame} 
+	
+	\frametitle{Perfect tensors}
+	
+	We examine a type of tensor of great importance in tensor networks.
+	
+	\begin{defn}
+		
+		\begin{itemize}
+		\item Let H, K be finite dimensional Hilbert spaces with dim H $ \leq $ dim K. An \textbf{isometry} $T: H \rightarrow K $ is a linear map that preserves inner products, that is, $ \langle \phi | T^*T | \psi \rangle = \langle \phi | \psi \rangle , \forall | \psi \rangle, | \phi \rangle \in H $
+		\item A \textbf{perfect tensor} is a tensor with an even number of legs which, across any bipartition of its legs, is proportional to an isometry from the Hilbert space of the input legs to the Hilbert space of the output legs. 
+		\end{itemize}
+	\end{defn}
+	\vs
+	Perfect tensors of 2n legs have the property that the state defined by any choice of its n legs is maximally entangled with the state on the remaining n legs [*]. States having such a property are known as \textit{absolutely maximally entangled.} As linear maps, perfect tensors represent isometric encoding maps for quantum error correcting codes.
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Examples of perfect tensors}
+	
+	\begin{itemize}
+	\item Any two legged unitary tensor is perfect.
+
+	\vs
+	\item 3 legged perfect tensor depicted below: 
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\linewidth]{"Untitled Diagram"}
+		\caption{3 legged perfect tensor. Composition (contraction) with its adjoint yields a scalar multiple of the identity along any of its legs}
+		\label{fig:perfect-3-tensor}
+	\end{figure}
+	\item 6 legged (hexagonal) perfect tensors
+	\end{itemize}
+	
+	\end{frame}
+
+
+\begin{frame} 
+	
+	\frametitle{Tensor networks from perfect tensors}
+	
+	From perfect tensors, we may construct two very important types of tensor networks. 
+	
+	\begin{itemize}
+		\item \textbf{Holographic states}: A holographic state is a state generated by the contraction of perfect tensors, where all interior legs are contracted, with open legs living on the network "boundary".
+		
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.4\linewidth]{"../Desktop/holographic state"}
+		\caption{A holographic hexagon state formed by the contraction of perfect tensors with no free interior legs [].}
+		\label{fig:holographic-state}
+	\end{figure}
+		
+	\end{itemize}
+	
+\end{frame}	
+
+\begin{frame}
+	\frametitle{Tensor networks from perfect tensors (continued)}
+	
+	\begin{itemize}
+		\item \textbf{Holographic codes}: A holographic code is the contraction of perfect tensors each having a single, free, uncontracted leg. We interpret it as an encoding isometry of a quantum error correcting code from the uncontracted legs in the interior to the uncontracted legs in the boundary.
+		
+			\begin{figure}
+			\centering
+			\includegraphics[width=0.4\linewidth]{"../Desktop/holographic code"}
+			\caption{A holographic pentagon code formed by the contraction of perfect tensors with free legs in the interior [*].}
+			\label{fig:holographic-code}
+		\end{figure}
+		
+	\end{itemize}
+	
+\end{frame}
+
+
+\begin{frame}
+	
+	\frametitle{Tensor networks on hyperbolic space: Holography and AdS/CFT}
+	
+	
+	%maybe shouldnt introduce this. Instead can say something like: tile a hyperbolic Poincare disk with perfect tensors to get holographic states, codes and relate bulk and boundary phenomena through the tensor network (entanglement in the boundary via geometry in the bulk).
+	\begin{itemize}
+		
+		%too much text, need images
+		
+		\item Consider a Poincaré disk model of hyperbolic space. Perform a regular tiling of the space using regular polygons such as equilateral triangles or regular hexagons. 
+		
+		\item Place perfect tensors on each tile and contract all neighbouring tensors with each other.
+		
+		\item Contraction of the tensors on each tile yields an infinite tensor network representing a holographic state or a holographic code, with the free legs on the boundary of the network giving rise to an infinite dimensional boundary Hilbert space. %justify why get a Hilbert space in the limit
+		
+		\item There is a duality (correspondence) between the bulk (interior of the tensor network) and the boundary of the network.
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Relating entanglement and geometry: The Ryu-Takayanagi (RT) Formula}
+	
+	Suppose we have a subspace $H_A$ of the boundary Hilbert space H. We can compute the entropy of a state $ \rho_A $ on the subspace $ H_A $ via the size of certain "geodesics" in the bulk. 
+	
+	\begin{theorem}[Lattice Ryu-Takayanagi (RT)]
+		
+		Suppose that we have a holographic state composed of a simply-connected planar tensor network of perfect tensors, whose graph has non-positive curvature. If A is a connected boundary region, we have the entropy of $\rho$ on A, $ S_A := S(\rho_A)$  given by $S_A = | \gamma_A | $, where $ | \gamma_A | $ is the number of tensor legs cut by $ \gamma_A $.  [*]
+		
+	\end{theorem}
+	\vs
+	Here, $\gamma_A$ is the surface in the bulk sharing a boundary with A that cuts the least number of tensor legs, known as the minimal geodesic.
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Encoding boundary entanglement}
+	
+	\begin{itemize}
+		
+		%too much text, add pictures
+		
+		\item The surface $ \gamma_A $ plays an important role in encoding boundary entanglement entropy, as demonstrated by lattice RT. We can make it paint an even clearer geometric picture of boundary entanglement. 
+		\vs
+		\item Given a boundary region A, we may distill bipartite entanglement between it and its complementary region A$^c$ to EPR pairs lying along a homologous surface in the bulk known as the \textbf{greedy geodesic}, $\gamma_A^*$, using an algorithm known as the \textbf{greedy algorithm}.
+		
+		% use the board to draw greedy geodesic and EPR pairs lying across it depicting the geometric encoding of boundary entanglement
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{The greedy algorithm}
+	
+	Starting at a given boundary region A, we push into the bulk via a sequence of local moves including a single tensor behind the cut in each move. If a tensor has at least half of its legs cut by the advancing geodesic, we include it behind the cut, as shown below.
+	\vs
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.4\linewidth]{"../Desktop/greedy algorithm"}
+		\caption{A step in the greedy algorithm including a tensor which has half of its legs cut into the advancing geodesic [*]}
+		\label{fig:greedy-algorithm}
+	\end{figure}
+	The algorithm stops when there are no more tensors with at least half of their legs cut by the geodesic or when the inclusion of any admissible tensor no longer decreases the geodesic length (hence achieving the local minimality condition). The resulting geodesic is $ \gamma_A^* $, the greedy geodesic. Note that the greedy geodesic $ \gamma_A^* $ may \textit{not} match the minimal geodesic $ \gamma_A $ in the lattice RT formula.
+
+\end{frame}
+
+
+\begin{frame}
+	
+	\frametitle{Entanglement distillation using the greedy algorithm}
+	
+	We can use the greedy algorithm to distill the bipartite entanglement between A and its complement $ A^c $. 
+	
+	At each step in the algorithm, we \textit{decouple} the admitted tensors from the ones above the cut, as shown in the diagram below.
+	
+	 \begin{figure}
+	 	\centering
+	 	\includegraphics[width=0.7\linewidth]{"../Desktop/Entanglement dist and ga"}
+	 	\caption{Entanglement distillation in the greedy algorithm}
+	 	\label{fig:entanglement-dist-and-ga}
+	 \end{figure}
+
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Maps of entanglement}
+	
+	Such entanglement distillation results in a series of maximally entangled pairs along the greedy geodesic, as below.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\linewidth]{"../Desktop/Bipartite ent map"}
+		\caption{Distilled bipartite entanglement along the greedy geodesic creating a "map of bipartite entanglement" between A and $A^c$}
+		\label{fig:bipartite-ent-map}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Maps of entanglement: Residual regions}
+
+	It may occur that the greedy geodesic does not agree with the minimal geodesic (such as when the boundary region A is \textit{disconnected}). In this case, when the greedy algorithm is applied to A and $A^c$, the greedy geodesics may not meet, and we get a so-called "bipartite residual region", as shown below.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.2\linewidth]{"../Desktop/Bipartite res region"}
+		\caption{A bipartite residual region between A and $A^c$ consisting of tensors not included in either greedy geodesic}
+		\label{fig:bipartite-res-region}
+	\end{figure}
+
+	In this case, not all of the bipartite entanglement is encoded in distilled EPR pairs along the greedy geodesics, and the tensors within the residual region encode the remaining bipartite entanglement. 
+	
+\end{frame}
+
+
+\begin{frame}
+	
+	\frametitle{Multipartite residual regions}
+	
+	\begin{itemize}
+		\item The case of studying entanglement between multiple boundary regions yields several similarities with the two region case. Bipartite entanglement between any one region and the others is distilled in maximally entangled pairs along the its greedy geodesic. 
+		
+		\item 	However, the greedy geodesics of different boundary regions may not meet, yielding a \textit{multipartite residual region}, as shown below.
+	\end{itemize}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.25\linewidth]{"../Desktop/Multipartite res region"}
+		\caption{Multipartite residual region of four boundary regions. It encodes the multipartite entanglement between the regions (more tensors trapped in the residual region corresponds to larger amount of multipartite entanglement) [*]}
+		\label{fig:multipartite-res-region}
+	\end{figure}
+	
+	%include additional facts about multipartite residual region (how O(1) connected components give O(1) MRR size) and talk about bulk reconstruction and operator pushing
+	
+	%include one more slide after this to wrap up this topic, if not talking about other things listed above
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Spin networks}
+	
+	\begin{itemize}
+		
+	%	\item Spin networks share many similarities with tensor networks and provide deep insight into how the entropy of a region of space is distributed in certain situations, suggesting a generalized form of entropy.
+	
+	% might need to give a brief preliminary on representation theory
+
+		\item Consider a bounded 2-dimensional lattice with labeled nodes and oriented edges.
+		
+		\item Let G be a topological group that is either a compact Lie group or else a discrete group (a group equipped with the discrete topology). 
+		
+
+		\item A spin network is an assignment of irreducible representations of G to each edge and intertwiners to each node mapping from representation spaces of edges ending at that node to ones starting at that node.
+		
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.4\linewidth]{"Spin network"}
+			\caption{A spin network}
+			\label{fig:spin-network}
+		\end{figure}
+		
+	\end{itemize}
+	
+\end{frame}
+	
+\begin{frame}
+	
+	\frametitle{Entropy of a region in a spin network}
+	
+	\begin{itemize}
+		
+		% work this out on the board
+		
+		\item We now wish to compute the entropy of a subregion A in a spin network, which will consist of a subset of the nodes of the network. Denote the complementary region as B.
+		
+		\item We may divide up the edges into those that have both of their ends in A, both in B and those that have one end in A and the other in B (boundary edges). We divide up the boundary edges in half to have one portion in A and the other in B, as shown.
+		
+		\begin{figure}
+			% image is bad
+			\centering
+			\includegraphics[width=0.4\linewidth]{"spin networks Hilbert spaces"}
+			\caption{Defining Hilbert spaces in a spin network. The boundary edges are split in half to give a set of boundary edges with one end in A: $\partial A$ and one end in B: $\partial B$, so that $\partial = \partial A \cup \partial B$}
+			\label{fig:spin-networks-hilbert-spaces}
+		\end{figure}
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Entropy of a region in a spin network (continued)}
+	
+	\begin{itemize}
+		
+		\item We then define the Hilbert space $H_A$ to be special square integrable functions (holonomies) on the set $G_A$ of group elements $u_{\ell}$ living on edges $\{\ell \in L_A \cup L_{\partial A}\}$ : $H_A = \{\psi: G_A \rightarrow \mathbb{C}: \int_G |\psi (h)|^2 dm(h) < \infty \text{ and } \psi \text{ is a holonomy} \}$ where m is the Haar measure on G. 
+		
+		%probably need to modify below
+		\item It is not the case that the full network Hilbert space H factorizes as $H = H_A \otimes H_B$, however, we may embed it into the tensor product via the embedding $\pi^*: H \hookrightarrow H_A \otimes H_B$ 
+		
+		\item Embedding the state of the entire spin network $|S \rangle$ in H into $H_A \otimes H_B$, tracing out B from the resulting density and from decomposing the representation of the boundary group elements (subgroup of the full network group) into a direct sum of irreducibles, we get the entropy of A given by: 
+		\vs
+		$S(\rho_A) = H(p(R_{\partial})) + \sum_{\ell \in L_{\partial A}} \langle log(dim(r_{\ell})) \rangle + \langle S(\rho_{A}(R_{\partial})) \rangle $
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Entropy of a region in a spin network (continued 2)}
+%	$S(\rho_A) = H(p(R_{\partial})) + \sum_{\ell \in L_{\partial A}} \langle log(dim(r_{\ell})) \rangle + \langle S(\rho_{A}(R_{\partial})) \rangle $
+	
+	\begin{itemize}
+		
+		%way too much text
+		
+		\item 	Here, H denotes the classical Shannon entropy, $p(R_{\partial})$ is a probability distribution over the representations on the boundary edges, $ \langle , \rangle $ denotes expectation with respect to that probability distribution, and $S(\rho_A (R_{\partial}))$ is the von Neumann entropy of the interior state in A (excluding the boundary terms) corresponding to boundary representations $R_\partial$. 
+		
+	\item	This expression for the entropy has a similar form as the algebraic entropy of a state $\rho$ with respect to a von Neumann algebra M on a finite dimensional Hilbert space H derived in [*]: 
+		
+		$S(\rho, M) = H(p_\alpha) + \sum_\alpha p_\alpha S(\rho_{A_\alpha}) = H(p_\alpha) + \langle S(\rho_{A_\alpha}) \rangle$ 
+		
+		Where H is decomposed as $H = \oplus_\alpha (H_{A_\alpha} \otimes H_{\bar{A_\alpha}})$ so that $M = \oplus_\alpha (L(H_{A_\alpha}) \otimes I_{\bar{A_\alpha}})$. The algebraic entropy reduces to standard von Neumann entropy when M is a factor. 
+		
+		\item Thus, we see that boundary degrees of freedom encode entanglement entropy between a region A and its complement, similar to the greedy geodesic with holographic tensor networks. 
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Conclusion: Summary}
+	
+	\begin{itemize}
+		
+		
+		\item We have shown how tensor networks and spin networks can be used to encode entanglement geometrically, by representing entanglement entropy via degrees of freedom along some geometric entangling surface (EPR pairs along the greedy geodesic in holographic case and edge modes on the boundary in spin networks). 
+		
+		\item This supports the relationship between entanglement and geometry argued in ER = EPR, where any form of entanglement is hypothesized to create some form of (potentially purely quantum mechanical) wormhole geometry.
+		
+		%picture of some wormhole ER = EPR
+		
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+	\frametitle{Conclusion: Further work}
+	
+	\begin{itemize}
+		
+		\item Understand how to model traversable wormholes using tensor networks.
+		\item In quantum teleportation, can modify protocol to integrate classical register storing measurement results of Alice. Can we somehow integrate this classical register into the edge modes living on the boundary between Alice and Bob's systems (algebras). 
+		\item Non-triviality of von Neumann algebra center related to contribution of edge modes to total entropy. Can think of wormhole as two complementary (commutant) algebras with center lying in throat. Larger throat should correspond to larger algebra center, but also know that negative energy enlarges throat. How can we model negative energy algebraically and how can we relate it to edge mdoe entropy contribution?
+		
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}
+	
+\vs
+\vs
+\vs
+\vs
+\begin{center}\textbf{\Large{Thank you!}}\end{center}
+	
+	
+\end{frame}
+
+\end{document}
